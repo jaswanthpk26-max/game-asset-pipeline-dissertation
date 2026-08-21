@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Asset Versions - Game Asset Pipeline System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <h1>Asset Version Management</h1>
+
+    <h2>Add New Version</h2>
+
+    <label>Select Asset:</label>
+<select id="assetId">
+    <option value="">Choose an asset</option>
+</select>
+    <br><br>
+
+    <label>Version Number:</label>
+    <input type="number" id="versionNumber">
+    <br><br>
+
+    <label>Version File:</label>
+<input type="file" id="versionFile">
+    <br><br>
+
+    <label>Notes:</label>
+    <input type="text" id="notes">
+    <br><br>
+
+    <button id="addVersionButton">Add Version</button>
+<button onclick="viewSelectedVersions()">
+    View Versions
+</button>
+    <h2>Version History</h2>
+
+    <div id="versionList"></div>
+<script>
+    const storedUserRole = localStorage.getItem('userRole');
+
+if (!storedUserRole) {
+    window.location.href = '/login.html';
+}
+fetch('/assets')
+    .then(response => response.json())
+    .then(assets => {
+        const assetSelect = document.getElementById('assetId');
+
+        assets.forEach(asset => {
+            const option = document.createElement('option');
+
+            option.value = asset.Asset_ID;
+            option.textContent = asset.Asset_Name;
+
+            assetSelect.appendChild(option);
+        });
+    });
+document.getElementById('addVersionButton').addEventListener('click', async function() {
+    const assetId = document.getElementById('assetId').value;
+    const versionNumber = document.getElementById('versionNumber').value;
+    const versionFile = document.getElementById('versionFile').files[0];
+    const notes = document.getElementById('notes').value;
+    if (!versionFile) {
+    alert('Please choose a version file.');
+    return;
+}
+
+const formData = new FormData();
+formData.append('versionFile', versionFile);
+
+const uploadResponse = await fetch('/upload-version-file', {
+    method: 'POST',
+    body: formData
+});
+
+const uploadResult = await uploadResponse.json();
+
+if (!uploadResponse.ok) {
+    alert(uploadResult.message || 'File upload failed');
+    return;
+}
+
+const filePath = uploadResult.filePath;
+
+    const response = await fetch(`/assets/${assetId}/versions`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            versionNumber,
+            filePath,
+            notes
+        })
+    });
+
+    const result = await response.json();
+    alert(result.message);
+});
+function viewSelectedVersions() {
+    const assetId = document.getElementById('assetId').value;
+
+    if (!assetId) {
+        alert('Please select an asset first.');
+        return;
+    }
+
+    loadVersions(assetId);
+}
+async function loadVersions(assetId) {
+    const response = await fetch(`/assets/${assetId}/versions`);
+    const versions = await response.json();
+
+    const versionList = document.getElementById('versionList');
+    versionList.innerHTML = '';
+
+   versions.forEach(version => {
+    const filePath = version.File_Path || '';
+    const isImage = /\.(png|jpg|jpeg|webp)$/i.test(filePath);
+
+    versionList.innerHTML += `
+        <div class="version-card">
+
+            <div class="version-preview">
+                ${
+                    isImage
+                    ? `<img src="${filePath}" alt="Version ${version.Version_Number} preview">`
+                    : `<div class="version-placeholder">Preview not available</div>`
+                }
+            </div>
+
+            <div class="version-info">
+                <h3>Version ${version.Version_Number}</h3>
+                <p><strong>File:</strong> ${version.File_Path}</p>
+                <p><strong>Notes:</strong> ${version.Notes || 'No notes'}</p>
+                <p><strong>Created:</strong> ${new Date(version.Created_At).toLocaleString('en-GB')}</p>
+            </div>
+
+        </div>
+    `;
+});
+}
+</script>
+</body>
+</html>

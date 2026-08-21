@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Projects - Game Asset Pipeline System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <h1>Projects</h1>
+
+    <div id="projectList"></div>
+<script>
+    const storedUserRole = localStorage.getItem('userRole');
+
+if (!storedUserRole) {
+    window.location.href = '/login.html';
+}
+fetch('/projects')
+    .then(response => response.json())
+    .then(projects => {
+        projects.forEach(project => {
+    document.getElementById('projectList').innerHTML += `
+        <h2>${project.Project_Name}</h2>
+        <p>${project.Description}</p>
+        <p>Status: ${project.Status}</p>
+    `;
+});
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Assets - Game Asset Pipeline System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="page-header">
+    <h1>Asset Library</h1>
+    <p>Manage production assets, versions and workflow stages.</p>
+</div>
+
+<div class="asset-panel">
+    <h2>Add New Asset</h2>
+<form id="assetForm">
+    <label>Asset Name:</label>
+    <input type="text" id="assetName">
+    <br><br>
+
+<label>Asset Type:</label>
+<select id="assetType">
+    <option value="3D Model">3D Model</option>
+    <option value="Texture">Texture</option>
+    <option value="Audio">Audio</option>
+    <option value="Document">Document</option>
+</select>
+
+<br><br>
+
+<label>File Path:</label>
+<input type="text" id="filePath">
+<br><br>
+
+<label>Status:</label>
+<select id="assetStatus">
+    <option value="Draft">Draft</option>
+    <option value="In Progress">In Progress</option>
+    <option value="Review">Review</option>
+    <option value="Final">Final</option>
+</select>
+
+<br><br>
+
+<button type="submit">Add Asset</button>
+
+</form>
+</div>
+<div class="asset-panel">
+    <h2>Search and Filter</h2>
+<label>Search Assets:</label>
+<input type="text" id="searchInput" placeholder="Search by asset name">
+<br><br>
+
+<label>Filter by Type:</label>
+<select id="typeFilter">
+    <option value="All">All Types</option>
+    <option value="3D Model">3D Model</option>
+    <option value="Texture">Texture</option>
+    <option value="Audio">Audio</option>
+    <option value="Document">Document</option>
+</select>
+</div>
+    <div id="assetList"></div>
+<script>
+    const storedUserRole = localStorage.getItem('userRole');
+
+    if (!storedUserRole) {
+        window.location.href = '/login.html';
+    }
+    document.getElementById('assetForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+
+    const assetName = document.getElementById('assetName').value;
+    const assetType = document.getElementById('assetType').value;
+    const filePath = document.getElementById('filePath').value;
+    const status = document.getElementById('assetStatus').value;
+    const response = await fetch('/assets', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        assetName,
+        assetType,
+        filePath,
+        status
+    })
+});
+const result = await response.json();
+alert(result.message);
+location.reload();
+});
+fetch('/assets')
+    .then(response => response.json())
+    .then(assets => {
+        const searchInput = document.getElementById('searchInput');
+        const typeFilter = document.getElementById('typeFilter');
+
+function applyFilters() {
+    const searchText = searchInput.value.toLowerCase();
+    const selectedType = typeFilter.value;
+
+    const filteredAssets = assets.filter(asset => {
+        const matchesSearch =
+            asset.Asset_Name.toLowerCase().includes(searchText);
+
+        const matchesType =
+            selectedType === 'All' ||
+            asset.Asset_Type === selectedType;
+
+        return matchesSearch && matchesType;
+    });
+
+    displayAssets(filteredAssets);
+}
+
+searchInput.addEventListener('input', applyFilters);
+typeFilter.addEventListener('change', applyFilters);
+   function displayAssets(assetArray) {
+    document.getElementById('assetList').innerHTML = '';
+
+    assetArray.forEach(asset => {
+        document.getElementById('assetList').innerHTML += `
+           <div class="asset-card">
+    <div class="asset-card-top">
+        <div>
+            <span class="asset-type-badge">${asset.Asset_Type}</span>
+            <h2>${asset.Asset_Name}</h2>
+        </div>
+
+        <span class="status-badge status-${asset.Status.replace(' ', '-').toLowerCase()}">
+            ${asset.Status}
+        </span>
+    </div>
+
+    <div class="asset-meta">
+        <p><strong>File</strong><br>${asset.File_Path}</p>
+        <p><strong>Last Updated</strong><br>${new Date(asset.Last_Updated).toLocaleString()}</p>
+    </div>
+</div>
+        `;
+    });
+}
+
+displayAssets(assets);
+    });
+</script>
+</body>
+</html>

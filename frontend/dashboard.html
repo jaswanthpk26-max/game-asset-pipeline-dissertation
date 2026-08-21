@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard - Game Asset Pipeline System</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <h1>Game Asset Pipeline System</h1>
+    <h2>Dashboard</h2>
+    <p id="roleDisplay"></p>
+<h3>System Summary</h3>
+
+<div class="dashboard-summary">
+
+    <div class="summary-card">
+        <h3>Total Assets</h3>
+        <span id="totalAssets">0</span>
+    </div>
+
+    <div class="summary-card">
+        <h3>Draft</h3>
+        <span id="draftCount">0</span>
+    </div>
+
+    <div class="summary-card">
+        <h3>In Progress</h3>
+        <span id="progressCount">0</span>
+    </div>
+
+    <div class="summary-card">
+        <h3>Review</h3>
+        <span id="reviewCount">0</span>
+    </div>
+
+    <div class="summary-card">
+        <h3>Final</h3>
+        <span id="finalCount">0</span>
+    </div>
+
+    <div class="summary-card">
+        <h3>Unread Notifications</h3>
+        <span id="unreadCount">0</span>
+    </div>
+
+</div>
+    <p>Welcome to the dashboard.</p>
+    <h3>Dashboard Menu</h3>
+<div class="dashboard-menu"></div>
+<button onclick="window.location.href='/projects.html'">Projects</button>
+<button onclick="window.location.href='/assets.html'">Assets</button>
+<button onclick="window.location.href='/workflow.html'">Workflow</button>
+<button onclick="window.location.href='/versions.html'">Versions</button>
+<button onclick="window.location.href='/assets.html'">Search</button>
+<button onclick="window.location.href='/notifications.html'">Notifications</button>
+<button onclick="logout()">Logout</button>
+</div>
+<h3>Production Pipeline</h3>
+
+<div class="pipeline-flow">
+    <div class="pipeline-stage">
+        <span>Draft</span>
+        <strong id="pipelineDraft">0</strong>
+    </div>
+
+    <div class="pipeline-arrow">→</div>
+
+    <div class="pipeline-stage">
+        <span>In Progress</span>
+        <strong id="pipelineProgress">0</strong>
+    </div>
+
+    <div class="pipeline-arrow">→</div>
+
+    <div class="pipeline-stage">
+        <span>Review</span>
+        <strong id="pipelineReview">0</strong>
+    </div>
+
+    <div class="pipeline-arrow">→</div>
+
+    <div class="pipeline-stage">
+        <span>Final</span>
+        <strong id="pipelineFinal">0</strong>
+    </div>
+</div>
+<div class="analytics-section">
+
+    <div class="chart-panel">
+        <h3>Asset Status Distribution</h3>
+        <p class="panel-description">
+            Current distribution of assets across production stages
+        </p>
+
+        <div class="chart-container">
+            <canvas id="statusChart"></canvas>
+        </div>
+    </div>
+<div class="insights-panel">
+    <h3>Production Insights</h3>
+    <p class="panel-description">Live overview of pipeline activity</p>
+
+    <div class="insight-grid">
+
+        <div class="insight-item">
+            <span>Total Assets</span>
+            <strong id="insightTotal">0</strong>
+        </div>
+
+        <div class="insight-item">
+            <span>In Review</span>
+            <strong id="insightReview">0%</strong>
+        </div>
+
+        <div class="insight-item">
+            <span>Completed</span>
+            <strong id="insightCompleted">0%</strong>
+        </div>
+
+        <div class="insight-item">
+            <span>Active Assets</span>
+            <strong id="insightActive">0</strong>
+        </div>
+
+    </div>
+</div>
+</div>
+<script>
+fetch('/assets')
+    .then(response => response.json())
+    .then(assets => {
+        document.getElementById('totalAssets').textContent = assets.length;
+        document.getElementById('draftCount').textContent =
+    assets.filter(asset => asset.Status === 'Draft').length;
+
+document.getElementById('progressCount').textContent =
+    assets.filter(asset => asset.Status === 'In Progress').length;
+
+document.getElementById('reviewCount').textContent =
+    assets.filter(asset => asset.Status === 'Review').length;
+
+document.getElementById('finalCount').textContent =
+    assets.filter(asset => asset.Status === 'Final').length;
+    document.getElementById('pipelineDraft').textContent =
+    assets.filter(asset => asset.Status === 'Draft').length;
+
+document.getElementById('pipelineProgress').textContent =
+    assets.filter(asset => asset.Status === 'In Progress').length;
+
+document.getElementById('pipelineReview').textContent =
+    assets.filter(asset => asset.Status === 'Review').length;
+
+document.getElementById('pipelineFinal').textContent =
+    assets.filter(asset => asset.Status === 'Final').length;
+    const draftCount = assets.filter(asset => asset.Status === 'Draft').length;
+const progressCount = assets.filter(asset => asset.Status === 'In Progress').length;
+const reviewCount = assets.filter(asset => asset.Status === 'Review').length;
+const finalCount = assets.filter(asset => asset.Status === 'Final').length;
+const totalAssets = assets.length;
+
+const reviewPercentage = totalAssets === 0
+    ? 0
+    : Math.round((reviewCount / totalAssets) * 100);
+
+const completedPercentage = totalAssets === 0
+    ? 0
+    : Math.round((finalCount / totalAssets) * 100);
+
+const activeAssets = draftCount + progressCount + reviewCount;
+
+document.getElementById('insightTotal').textContent = totalAssets;
+document.getElementById('insightReview').textContent = reviewPercentage + '%';
+document.getElementById('insightCompleted').textContent = completedPercentage + '%';
+document.getElementById('insightActive').textContent = activeAssets;
+
+const ctx = document.getElementById('statusChart');
+
+new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Draft', 'In Progress', 'Review', 'Final'],
+        datasets: [{
+            data: [
+                draftCount,
+                progressCount,
+                reviewCount,
+                finalCount
+            ],
+            backgroundColor: [
+                '#7a7f8c',
+                '#00d9ff',
+                '#ffb74d',
+                '#5bff9c'
+            ],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                labels: {
+                    color: '#ffffff'
+                }
+            }
+        }
+    }
+});
+    });
+    fetch('/notifications/1')
+    .then(response => response.json())
+    .then(notifications => {
+        const unreadNotifications = notifications.filter(
+            notification => !notification.Is_Read
+        );
+
+        document.getElementById('unreadCount').textContent =
+            unreadNotifications.length;
+    });
+    function logout() {
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userId');
+
+    window.location.href = '/login.html';
+}
+</script>
+<script>
+    const storedUserRole = localStorage.getItem('userRole');
+
+if (!storedUserRole) {
+    window.location.href = '/login.html';
+}
+    const userRole = localStorage.getItem('userRole');
+    document.getElementById('roleDisplay').textContent = 'Logged in as: ' + userRole;
+</script>
+</body>
+</html>

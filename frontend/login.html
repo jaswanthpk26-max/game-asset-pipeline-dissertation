@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game Asset Pipeline System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <h1>Game Asset Pipeline System</h1>
+    <h2>Login</h2>
+<form id="loginForm">
+    <label>Email:</label>
+    <input type="email" name="email" id="email">
+
+    <br><br>
+
+    <label>Password:</label>
+    <input type="password" name="password" id="password">
+
+    <br><br>
+
+    <button type="submit">Login</button>
+    <p id="message"></p>
+</form>
+<script>
+document.getElementById('loginForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    const email = document.getElementById('email').value;
+const password = document.getElementById('password').value;
+const response = await fetch('/login', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ email, password })
+});
+const data = await response.json();
+document.getElementById('message').textContent = data.message;
+if (response.ok) {
+    localStorage.setItem('userRole', data.user.Role);
+localStorage.setItem('userId', data.user.User_ID);
+    window.location.href = '/dashboard.html';
+}
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Asset Activity - Game Asset Pipeline System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="page-header">
+        <h1>Asset Activity & Audit Trail</h1>
+        <p>Track status changes, responsible users and production timestamps.</p>
+    </div>
+
+    <div class="activity-panel">
+        <div class="activity-panel-header">
+            <h2>Production History</h2>
+            <span>Live Audit Data</span>
+        </div>
+
+        <div id="activityList" class="activity-timeline"></div>
+    </div>
+
+    <script>
+        const storedUserRole = localStorage.getItem('userRole');
+
+        if (!storedUserRole) {
+            window.location.href = '/login.html';
+        }
+        fetch('/asset-activity')
+    .then(response => response.json())
+    .then(activities => {
+
+        const activityList = document.getElementById('activityList');
+
+        if (activities.length === 0) {
+            activityList.innerHTML += `
+    <div class="activity-timeline">
+
+        <div class="activity-item">
+
+            <div class="activity-time">
+                ${formattedDate}
+            </div>
+
+            <h3>${activity.Asset_Name}</h3>
+
+            <div class="activity-status">
+                <span class="activity-badge">${activity.Old_Status}</span>
+
+                <span class="activity-arrow">→</span>
+
+                <span class="activity-badge">${activity.New_Status}</span>
+            </div>
+
+            <div class="activity-user">
+                Changed by
+                <strong>${activity.User_Name || 'Unknown User'}</strong>
+                •
+                ${activity.User_Role || 'Unknown Role'}
+            </div>
+
+        </div>
+
+    </div>
+`;
+        }
+
+        activities.forEach(activity => {
+
+            const changedDate = new Date(activity.Changed_At);
+
+            const formattedDate = changedDate.toLocaleString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+
+            activityList.innerHTML += `
+                <div class="activity-item">
+
+                    <div class="activity-marker"></div>
+
+                    <div class="activity-content">
+
+                        <div class="activity-top">
+                            <h3>${activity.Asset_Name}</h3>
+                            <span class="activity-time">${formattedDate}</span>
+                        </div>
+
+                        <div class="status-change">
+                            <span class="old-status">${activity.Old_Status}</span>
+                            <span class="status-arrow">→</span>
+                            <span class="new-status">${activity.New_Status}</span>
+                        </div>
+
+                        <div class="activity-user">
+                            Changed by
+                            <strong>${activity.User_Name || 'Unknown User'}</strong>
+                            <span>•</span>
+                            ${activity.User_Role || 'Unknown Role'}
+                        </div>
+
+                    </div>
+                </div>
+            `;
+        });
+    })
+    .catch(error => {
+        console.error('Failed to load activity:', error);
+    });
+    </script>
+
+</body>
+</html>

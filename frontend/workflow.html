@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Workflow - Game Asset Pipeline System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+   <div class="page-header">
+    <h1>Visual Production Workflow</h1>
+    <p>Track game assets across each stage of the production pipeline.</p>
+</div>
+
+<div class="workflow-board">
+
+    <div class="workflow-column draft-column">
+        <div class="workflow-column-header">
+            <h2>Draft</h2>
+            <span>Initial Stage</span>
+        </div>
+        <div id="draftList" class="workflow-list"></div>
+    </div>
+
+    <div class="workflow-column progress-column">
+        <div class="workflow-column-header">
+            <h2>In Progress</h2>
+            <span>Production</span>
+        </div>
+        <div id="progressList" class="workflow-list"></div>
+    </div>
+
+    <div class="workflow-column review-column">
+        <div class="workflow-column-header">
+            <h2>Review</h2>
+            <span>Approval Stage</span>
+        </div>
+        <div id="reviewList" class="workflow-list"></div>
+    </div>
+
+    <div class="workflow-column final-column">
+        <div class="workflow-column-header">
+            <h2>Final</h2>
+            <span>Completed</span>
+        </div>
+        <div id="finalList" class="workflow-list"></div>
+    </div>
+
+</div>
+    <script>
+        const storedUserRole = localStorage.getItem('userRole');
+
+if (!storedUserRole) {
+    window.location.href = '/login.html';
+}
+fetch('/assets')
+    .then(response => response.json())
+    .then(assets => {
+        assets.forEach(asset => {
+
+    let targetList;
+
+    if (asset.Status === 'Draft') {
+        targetList = 'draftList';
+    } else if (asset.Status === 'In Progress') {
+        targetList = 'progressList';
+    } else if (asset.Status === 'Review') {
+        targetList = 'reviewList';
+    } else if (asset.Status === 'Final') {
+        targetList = 'finalList';
+    }
+if (targetList) {
+    document.getElementById(targetList).innerHTML += `
+        <div>
+            <h3>${asset.Asset_Name}</h3>
+
+<div class="asset-meta">
+    <span class="asset-type-badge">${asset.Asset_Type}</span>
+    <span class="status-badge">${asset.Status}</span>
+</div>
+
+<p class="updated-time">
+    Last Updated:
+    ${asset.Last_Updated
+        ? new Date(asset.Last_Updated).toLocaleString('en-GB')
+        : 'Not available'}
+</p>
+            <select id="status-${asset.Asset_ID}">
+   <option value="Draft" ${asset.Status === 'Draft' ? 'selected' : ''}>Draft</option>
+<option value="In Progress" ${asset.Status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+<option value="Review" ${asset.Status === 'Review' ? 'selected' : ''}>Review</option>
+<option value="Final" ${asset.Status === 'Final' ? 'selected' : ''}>Final</option>
+</select>
+
+<button onclick="updateStatus(${asset.Asset_ID})">
+    Update Status
+</button>
+${asset.Status === 'Review' && 
+  (localStorage.getItem('userRole') === 'Administrator' ||
+   localStorage.getItem('userRole') === 'Project Manager') ? `
+    <button onclick="approveAsset(${asset.Asset_ID})">Approve</button>
+    <button onclick="rejectAsset(${asset.Asset_ID})">Reject</button>
+` : ''}
+        </div>
+    `;
+}
+});
+    });
+
+    async function updateStatus(assetId) {
+    const status = document.getElementById(`status-${assetId}`).value;
+
+    const response = await fetch(`/assets/${assetId}/status`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status })
+    });
+
+    const result = await response.json();
+    alert(result.message);
+
+    location.reload();
+}
+async function approveAsset(assetId) {
+    const response = await fetch(`/assets/${assetId}/status`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: 'Final' })
+    });
+
+    const result = await response.json();
+    alert('Asset approved successfully');
+
+    location.reload();
+}
+async function rejectAsset(assetId) {
+    const response = await fetch(`/assets/${assetId}/status`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: 'In Progress' })
+    });
+
+    const result = await response.json();
+    alert('Asset rejected and returned to In Progress');
+
+    location.reload();
+}
+</script>
+
+</body>
+</html>

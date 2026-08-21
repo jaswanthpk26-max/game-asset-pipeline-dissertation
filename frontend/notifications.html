@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Notifications - Game Asset Pipeline System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <h1>Notifications</h1>
+    <h2>Create Test Notification</h2>
+
+<input type="text" id="messageInput" placeholder="Enter notification message">
+
+<button id="createNotificationButton">
+    Create Notification
+</button>
+
+<br><br>
+
+    <div id="notificationList"></div>
+<script>
+    const storedUserRole = localStorage.getItem('userRole');
+
+if (!storedUserRole) {
+    window.location.href = '/login.html';
+}
+    document.getElementById('createNotificationButton').addEventListener('click', async function() {
+    const message = document.getElementById('messageInput').value;
+
+    const response = await fetch('/notifications', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            userId: 1,
+            message: message
+        })
+    });
+
+    const result = await response.json();
+    alert(result.message);
+
+    location.reload();
+});
+fetch('/notifications/1')
+    .then(response => response.json())
+    .then(notifications => {
+       notifications.forEach(notification => {
+    document.getElementById('notificationList').innerHTML += `
+        <p>${notification.Message}</p>
+        <p>Status: ${notification.Is_Read ? 'Read' : 'Unread'}</p>
+        <small>${notification.Created_At}</small>
+        <br>
+        ${notification.Is_Read
+    ? '<span>Already Read</span>'
+    : `<button onclick="markAsRead(${notification.Notification_ID})">Mark as Read</button>`
+}
+        <hr>
+    `;
+});
+    });
+    async function markAsRead(notificationId) {
+    const response = await fetch(`/notifications/${notificationId}/read`, {
+        method: 'PUT'
+    });
+
+    const result = await response.json();
+
+    alert(result.message);
+    location.reload();
+}
+</script>
+</body>
+</html>
