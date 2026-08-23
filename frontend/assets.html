@@ -32,7 +32,8 @@
 <label>File Path:</label>
 <input type="text" id="filePath">
 <br><br>
-
+<label>Preview Image:</label>
+<input type="file" id="previewFile" accept="image/*">
 <label>Status:</label>
 <select id="assetStatus">
     <option value="Draft">Draft</option>
@@ -76,6 +77,21 @@
     const assetType = document.getElementById('assetType').value;
     const filePath = document.getElementById('filePath').value;
     const status = document.getElementById('assetStatus').value;
+    const previewFile = document.getElementById('previewFile').files[0];
+    let previewPath = null;
+
+if (previewFile) {
+    const previewFormData = new FormData();
+    previewFormData.append('previewFile', previewFile);
+
+    const previewUploadResponse = await fetch('/upload-preview', {
+        method: 'POST',
+        body: previewFormData
+    });
+
+    const previewUploadResult = await previewUploadResponse.json();
+    previewPath = previewUploadResult.previewPath;
+}
     const response = await fetch('/assets', {
     method: 'POST',
     headers: {
@@ -85,6 +101,7 @@
         assetName,
         assetType,
         filePath,
+        previewPath,
         status
     })
 });
@@ -134,7 +151,18 @@ typeFilter.addEventListener('change', applyFilters);
             ${asset.Status}
         </span>
     </div>
-
+<div class="asset-preview">
+    ${
+        /^\/uploads\/.+\.(png|jpg|jpeg|webp)$/i.test(asset.Preview_Path || '')
+        ? `<img
+       src="${asset.Preview_Path}"
+       alt="${asset.Asset_Name} preview"
+       onclick="openPreview('${asset.Preview_Path}', '${asset.Asset_Name}')"
+       style="cursor: pointer;"
+   >`
+        : `<div class="asset-preview-placeholder">${asset.Asset_Type}</div>`
+    }
+</div>
     <div class="asset-meta">
         <p><strong>File</strong><br>${asset.File_Path}</p>
         <p><strong>Last Updated</strong><br>${new Date(asset.Last_Updated).toLocaleString()}</p>
@@ -146,6 +174,28 @@ typeFilter.addEventListener('change', applyFilters);
 
 displayAssets(assets);
     });
+    function openPreview(imagePath, assetName) {
+    document.getElementById('previewLargeImage').src = imagePath;
+    document.getElementById('previewTitle').textContent = assetName;
+    document.getElementById('previewModal').style.display = 'flex';
+}
+
+function closePreview() {
+    document.getElementById('previewModal').style.display = 'none';
+}
 </script>
+<div id="previewModal" class="preview-modal" onclick="closePreview()">
+
+    <div class="preview-modal-content" onclick="event.stopPropagation()">
+
+        <button class="preview-close" onclick="closePreview()">×</button>
+
+        <h2 id="previewTitle">Asset Preview</h2>
+
+        <img id="previewLargeImage" src="" alt="Large asset preview">
+
+    </div>
+
+</div>
 </body>
 </html>

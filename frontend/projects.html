@@ -21,10 +21,40 @@ fetch('/projects')
     .then(projects => {
         projects.forEach(project => {
     document.getElementById('projectList').innerHTML += `
-        <h2>${project.Project_Name}</h2>
-        <p>${project.Description}</p>
-        <p>Status: ${project.Status}</p>
-    `;
+    <div class="project-card">
+
+        <div class="project-card-header">
+            <div>
+                <span class="project-label">GAME PRODUCTION PROJECT</span>
+                <h2>${project.Project_Name}</h2>
+            </div>
+
+            <span class="project-status">${project.Status}</span>
+        </div>
+
+        <p class="project-description">
+            ${project.Description}
+        </p>
+
+        <div class="project-meta">
+            <div>
+                <span>Project Status</span>
+                <strong>${project.Status}</strong>
+            </div>
+
+            <div>
+                <span>Production System</span>
+                <strong>Asset Pipeline</strong>
+            </div>
+        </div>
+
+        <button class="project-open-button"
+            onclick="window.location.href='/assets.html'">
+            View Project Assets
+        </button>
+
+    </div>
+`;
 });
     });
 </script>

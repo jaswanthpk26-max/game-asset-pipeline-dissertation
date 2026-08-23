@@ -35,7 +35,7 @@
 </button>
     <h2>Version History</h2>
 
-    <div id="versionList"></div>
+    <div id="versionList" class="version-timeline"></div>
 <script>
     const storedUserRole = localStorage.getItem('userRole');
 
@@ -111,27 +111,57 @@ function viewSelectedVersions() {
 async function loadVersions(assetId) {
     const response = await fetch(`/assets/${assetId}/versions`);
     const versions = await response.json();
+    if (versions.length > 0) {
+    const highestVersion = Math.max(
+        ...versions.map(version => Number(version.Version_Number))
+    );
+
+    document.getElementById('versionNumber').value = highestVersion + 1;
+} else {
+    document.getElementById('versionNumber').value = 1;
+}
 
     const versionList = document.getElementById('versionList');
     versionList.innerHTML = '';
 
-   versions.forEach(version => {
+   versions.forEach((version, index) => {
     const filePath = version.File_Path || '';
     const isImage = /\.(png|jpg|jpeg|webp)$/i.test(filePath);
+    const isObj = /\.obj$/i.test(filePath);
+    const isAudio = /\.(mp3|wav)$/i.test(filePath);
+const isDocument = /\.(pdf|doc|docx|txt)$/i.test(filePath);
 
     versionList.innerHTML += `
         <div class="version-card">
 
             <div class="version-preview">
-                ${
-                    isImage
-                    ? `<img src="${filePath}" alt="Version ${version.Version_Number} preview">`
-                    : `<div class="version-placeholder">Preview not available</div>`
-                }
+               ${
+    isImage
+    ? `<img src="${filePath}" alt="Version ${version.Version_Number} preview">`
+    : isObj
+        ? `<div class="version-placeholder version-placeholder-obj">
+               <div class="file-type-large">3D</div>
+               <div>OBJ Model</div>
+          </div>`
+        : isAudio
+            ? `<div class="version-placeholder version-placeholder-audio">
+                   <div class="file-type-large">AUDIO</div>
+                   <div>Sound File</div>
+              </div>`
+            : isDocument
+                ? `<div class="version-placeholder version-placeholder-document">
+                       <div class="file-type-large">DOC</div>
+                       <div>Document</div>
+                  </div>`
+                : `<div class="version-placeholder">Preview not available</div>`
+}
             </div>
 
             <div class="version-info">
-                <h3>Version ${version.Version_Number}</h3>
+               <h3>
+    Version ${version.Version_Number}
+    ${index === 0 ? '<span class="current-version-badge">CURRENT</span>' : ''}
+</h3>
                 <p><strong>File:</strong> ${version.File_Path}</p>
                 <p><strong>Notes:</strong> ${version.Notes || 'No notes'}</p>
                 <p><strong>Created:</strong> ${new Date(version.Created_At).toLocaleString('en-GB')}</p>

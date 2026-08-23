@@ -8,55 +8,113 @@
 
 <body>
 
-    <h1>Game Asset Pipeline System</h1>
-    <h2>Dashboard</h2>
-    <p id="roleDisplay"></p>
-<h3>System Summary</h3>
+    <div class="dashboard-header">
+
+    <div>
+        <p class="dashboard-eyebrow">GAME ASSET PIPELINE SYSTEM</p>
+        <h1>Production Dashboard</h1>
+        <p class="dashboard-subtitle">
+            Monitor asset progress, workflow status and production activity
+        </p>
+    </div>
+
+    <div class="dashboard-role-box">
+        <span>Logged in as</span>
+        <strong id="roleDisplay">Administrator</strong>
+    </div>
+
+</div>
+
+<h2 class="dashboard-section-title">Production Overview</h2>
 
 <div class="dashboard-summary">
 
-    <div class="summary-card">
-        <h3>Total Assets</h3>
-        <span id="totalAssets">0</span>
-    </div>
+   <div class="summary-card">
+    <span class="summary-label">TOTAL ASSETS</span>
+    <strong id="totalAssets">0</strong>
+    <small>All managed assets</small>
+</div>
 
     <div class="summary-card">
-        <h3>Draft</h3>
-        <span id="draftCount">0</span>
-    </div>
+    <span class="summary-label">DRAFT</span>
+    <strong id="draftCount">0</strong>
+    <small>Awaiting production</small>
+</div>
 
     <div class="summary-card">
-        <h3>In Progress</h3>
-        <span id="progressCount">0</span>
-    </div>
+    <span class="summary-label">IN PROGRESS</span>
+    <strong id="progressCount">0</strong>
+    <small>Currently being worked on</small>
+</div>
 
     <div class="summary-card">
-        <h3>Review</h3>
-        <span id="reviewCount">0</span>
-    </div>
+    <span class="summary-label">REVIEW</span>
+    <strong id="reviewCount">0</strong>
+    <small>Awaiting decision</small>
+</div>
 
     <div class="summary-card">
-        <h3>Final</h3>
-        <span id="finalCount">0</span>
-    </div>
+    <span class="summary-label">FINAL</span>
+    <strong id="finalCount">0</strong>
+    <small>Production ready</small>
+</div>
 
     <div class="summary-card">
-        <h3>Unread Notifications</h3>
-        <span id="unreadCount">0</span>
-    </div>
+    <span class="summary-label">NOTIFICATIONS</span>
+    <strong id="unreadCount">0</strong>
+    <small>Unread updates</small>
+</div>
 
 </div>
-    <p>Welcome to the dashboard.</p>
-    <h3>Dashboard Menu</h3>
-<div class="dashboard-menu"></div>
-<button onclick="window.location.href='/projects.html'">Projects</button>
-<button onclick="window.location.href='/assets.html'">Assets</button>
-<button onclick="window.location.href='/workflow.html'">Workflow</button>
-<button onclick="window.location.href='/versions.html'">Versions</button>
-<button onclick="window.location.href='/assets.html'">Search</button>
-<button onclick="window.location.href='/notifications.html'">Notifications</button>
-<button onclick="logout()">Logout</button>
-</div>
+   
+<section class="quick-actions-section">
+
+    <div class="quick-actions-header">
+        <h2>Quick Actions</h2>
+        <p>Access the main production tools</p>
+    </div>
+
+    <div class="quick-actions-grid">
+
+        <button class="quick-action-card"
+            onclick="window.location.href='/projects.html'">
+            <strong>Projects</strong>
+            <span>Manage production projects</span>
+        </button>
+
+        <button class="quick-action-card"
+            onclick="window.location.href='/assets.html'">
+            <strong>Asset Library</strong>
+            <span>Upload and manage game assets</span>
+        </button>
+
+        <button class="quick-action-card"
+            onclick="window.location.href='/workflow.html'">
+            <strong>Workflow Board</strong>
+            <span>Track assets through production</span>
+        </button>
+
+        <button class="quick-action-card"
+            onclick="window.location.href='/versions.html'">
+            <strong>Version History</strong>
+            <span>Review and manage asset versions</span>
+        </button>
+
+        <button class="quick-action-card"
+            onclick="window.location.href='/notifications.html'">
+            <strong>Notifications</strong>
+            <span>View production updates</span>
+        </button>
+
+        <button class="quick-action-card logout-action"
+            onclick="logout()">
+            <strong>Logout</strong>
+            <span>End the current session</span>
+        </button>
+
+    </div>
+
+</section>
 <h3>Production Pipeline</h3>
 
 <div class="pipeline-flow">
@@ -127,6 +185,26 @@
     </div>
 </div>
 </div>
+<section class="dashboard-activity-section">
+
+    <div class="dashboard-panel">
+        <div class="dashboard-panel-header">
+            <div>
+                <h2>Recent Activity</h2>
+                <p>Latest asset workflow changes</p>
+            </div>
+
+            <a href="activity.html" class="dashboard-link">
+                View Full Audit Trail
+            </a>
+        </div>
+
+        <div id="dashboardActivityList">
+            <p>Loading recent activity...</p>
+        </div>
+    </div>
+
+</section>
 <script>
 fetch('/assets')
     .then(response => response.json())
@@ -235,6 +313,39 @@ if (!storedUserRole) {
 }
     const userRole = localStorage.getItem('userRole');
     document.getElementById('roleDisplay').textContent = 'Logged in as: ' + userRole;
+fetch('/asset-activity')
+    .then(response => response.json())
+    .then(activities => {
+        const activityList = document.getElementById('dashboardActivityList');
+
+        activityList.innerHTML = '';
+
+        const recentActivities = activities.slice(0, 5);
+
+        recentActivities.forEach(activity => {
+            activityList.innerHTML += `
+                <div class="dashboard-activity-item">
+                    <div>
+                        <strong>${activity.Asset_Name}</strong>
+                        <p>
+                            ${activity.Old_Status} → ${activity.New_Status}
+                        </p>
+                    </div>
+
+                    <div class="dashboard-activity-meta">
+                        <span>${activity.User_Name}</span>
+                        <span>
+                            ${new Date(activity.Changed_At).toLocaleString('en-GB')}
+                        </span>
+                    </div>
+                </div>
+            `;
+        });
+
+        if (recentActivities.length === 0) {
+            activityList.innerHTML = '<p>No recent activity.</p>';
+        }
+    });
 </script>
 </body>
 </html>

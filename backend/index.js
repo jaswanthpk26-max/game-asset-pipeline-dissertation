@@ -29,6 +29,18 @@ app.post('/upload-version-file', upload.single('versionFile'), (req, res) => {
         filePath: '/uploads/' + req.file.filename
     });
 });
+app.post('/upload-preview', upload.single('previewFile'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({
+            message: 'No preview image uploaded'
+        });
+    }
+
+    res.json({
+        message: 'Preview image uploaded successfully',
+        previewPath: '/uploads/' + req.file.filename
+    });
+});
 const PORT = 3000;
 const db = mysql.createConnection({
     host: process.env.DB_HOST,
@@ -161,15 +173,15 @@ app.put('/assets/:id/status', (req, res) => {
 });
 
 app.post('/assets', (req, res) => {
-    const { assetName, assetType, filePath, status } = req.body;
+    const { assetName, assetType, filePath, previewPath, status } = req.body;
 
     const sql = `
         INSERT INTO Assets
-        (Asset_Name, Asset_Type, File_Path, Project_ID, Uploaded_By, Status)
-        VALUES (?, ?, ?, 1, 1, ?)
+(Asset_Name, Asset_Type, File_Path, Preview_Path, Project_ID, Uploaded_By, Status)
+VALUES (?, ?, ?, ?, 1, 1, ?)
     `;
 
-    db.query(sql, [assetName, assetType, filePath, status], (err, result) => {
+   db.query(sql, [assetName, assetType, filePath, previewPath, status], (err, result) => {
         if (err) {
             console.log(err);
             res.status(500).json({ message: 'Failed to add asset' });

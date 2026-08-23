@@ -78,7 +78,13 @@ if (targetList) {
     <span class="asset-type-badge">${asset.Asset_Type}</span>
     <span class="status-badge">${asset.Status}</span>
 </div>
-
+<div class="workflow-preview">
+    ${
+        /^\/uploads\/.+\.(png|jpg|jpeg|webp)$/i.test(asset.Preview_Path || '')
+        ? `<img src="${asset.Preview_Path}" alt="${asset.Asset_Name} preview">`
+        : `<div class="workflow-preview-placeholder">${asset.Asset_Type}</div>`
+    }
+</div>
 <p class="updated-time">
     Last Updated:
     ${asset.Last_Updated
