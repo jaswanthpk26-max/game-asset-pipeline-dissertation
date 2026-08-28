@@ -343,6 +343,62 @@ app.get('/asset-activity', (req, res) => {
         res.json(results);
     });
 });
+app.delete('/assets/:assetId', (req, res) => {
+    const assetId = req.params.assetId;
+
+    // First delete the asset's activity history
+    db.query(
+        'DELETE FROM Asset_Activity WHERE Asset_ID = ?',
+        [assetId],
+        (err) => {
+            if (err) {
+                console.log(err);
+                return res.status(500).json({
+                    message: 'Failed to delete asset activity'
+                });
+            }
+
+            // Then delete the asset's versions
+            db.query(
+                'DELETE FROM Asset_Versions WHERE Asset_ID = ?',
+                [assetId],
+                (err) => {
+                    if (err) {
+                        console.log(err);
+                        return res.status(500).json({
+                            message: 'Failed to delete asset versions'
+                        });
+                    }
+
+                    // Finally delete the asset itself
+                    db.query(
+                        'DELETE FROM Assets WHERE Asset_ID = ?',
+                        [assetId],
+                        (err, result) => {
+                            if (err) {
+                                console.log(err);
+                                return res.status(500).json({
+                                    message: 'Failed to delete asset'
+                                });
+                            }
+
+                            if (result.affectedRows === 0) {
+                                return res.status(404).json({
+                                    message: 'Asset not found'
+                                });
+                            }
+
+                            res.json({
+                                message: 'Asset deleted successfully'
+                            });
+                        }
+                    );
+                }
+            );
+        }
+    );
+});
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });

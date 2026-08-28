@@ -167,6 +167,15 @@ typeFilter.addEventListener('change', applyFilters);
         <p><strong>File</strong><br>${asset.File_Path}</p>
         <p><strong>Last Updated</strong><br>${new Date(asset.Last_Updated).toLocaleString()}</p>
     </div>
+    ${storedUserRole === 'Administrator' ? `
+    <div class="asset-actions">
+        <button
+            class="delete-asset-button"
+            onclick="deleteAsset(${asset.Asset_ID})">
+            Delete Asset
+        </button>
+    </div>
+` : ''}
 </div>
         `;
     });
@@ -182,6 +191,33 @@ displayAssets(assets);
 
 function closePreview() {
     document.getElementById('previewModal').style.display = 'none';
+}
+async function deleteAsset(assetId) {
+    const confirmed = confirm(
+        'Are you sure you want to permanently delete this asset? Its versions and activity history will also be removed.'
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/assets/${assetId}`, {
+            method: 'DELETE'
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert('Asset deleted successfully.');
+            location.reload();
+        } else {
+            alert(result.message || 'Failed to delete asset.');
+        }
+    } catch (error) {
+        console.error(error);
+        alert('An error occurred while deleting the asset.');
+    }
 }
 </script>
 <div id="previewModal" class="preview-modal" onclick="closePreview()">
