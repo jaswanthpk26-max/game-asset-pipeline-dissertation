@@ -6,12 +6,12 @@
 </head>
 
 <body>
-
+<!-- Display the visual production workflow page title and description -->
    <div class="page-header">
     <h1>Visual Production Workflow</h1>
     <p>Track game assets across each stage of the production pipeline.</p>
 </div>
-
+<!-- Organise assets into Draft, In Progress, Review and Final workflow stages -->
 <div class="workflow-board">
 
     <div class="workflow-column draft-column">
@@ -48,14 +48,17 @@
 
 </div>
     <script>
+        // Check whether the user is logged in before allowing access to the Visual Workflow
         const storedUserRole = localStorage.getItem('userRole');
 
 if (!storedUserRole) {
     window.location.href = '/login.html';
 }
+// Retrieve all assets from the backend for display in the workflow board
 fetch('/assets')
     .then(response => response.json())
     .then(assets => {
+        // Assign each asset to the correct workflow column based on its current status
         assets.forEach(asset => {
 
     let targetList;
@@ -69,6 +72,7 @@ fetch('/assets')
     } else if (asset.Status === 'Final') {
         targetList = 'finalList';
     }
+    // Display the asset information and controls inside its assigned workflow column
 if (targetList) {
     document.getElementById(targetList).innerHTML += `
         <div>
@@ -101,6 +105,7 @@ if (targetList) {
 <button onclick="updateStatus(${asset.Asset_ID})">
     Update Status
 </button>
+<!-- Show approval controls only to Administrator and Project Manager roles during Review -->
 ${asset.Status === 'Review' && 
   (localStorage.getItem('userRole') === 'Administrator' ||
    localStorage.getItem('userRole') === 'Project Manager') ? `
@@ -112,7 +117,7 @@ ${asset.Status === 'Review' &&
 }
 });
     });
-
+// Update the selected asset's workflow status and save the change through the backend
     async function updateStatus(assetId) {
     const status = document.getElementById(`status-${assetId}`).value;
 
@@ -129,6 +134,7 @@ ${asset.Status === 'Review' &&
 
     location.reload();
 }
+// Approve the selected asset by moving it from Review to the Final workflow stage
 async function approveAsset(assetId) {
     const response = await fetch(`/assets/${assetId}/status`, {
         method: 'PUT',
@@ -143,6 +149,7 @@ async function approveAsset(assetId) {
 
     location.reload();
 }
+// Reject the selected asset by returning it from Review to the In Progress stage
 async function rejectAsset(assetId) {
     const response = await fetch(`/assets/${assetId}/status`, {
         method: 'PUT',

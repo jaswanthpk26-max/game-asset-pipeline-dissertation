@@ -6,9 +6,9 @@
 </head>
 
 <body>
-
+<!-- Display the asset version management page title -->
     <h1>Asset Version Management</h1>
-
+<!-- Provide controls for uploading and recording a new asset version -->
     <h2>Add New Version</h2>
 
     <label>Select Asset:</label>
@@ -33,15 +33,18 @@
 <button onclick="viewSelectedVersions()">
     View Versions
 </button>
+<!-- Display the version history of the selected asset -->
     <h2>Version History</h2>
 
     <div id="versionList" class="version-timeline"></div>
 <script>
+    // Check whether the user is logged in before allowing access to Version Management
     const storedUserRole = localStorage.getItem('userRole');
 
 if (!storedUserRole) {
     window.location.href = '/login.html';
 }
+// Retrieve available assets from the backend for the asset selection list
 fetch('/assets')
     .then(response => response.json())
     .then(assets => {
@@ -56,6 +59,7 @@ fetch('/assets')
             assetSelect.appendChild(option);
         });
     });
+    // Handle the creation of a new version for the selected asset
 document.getElementById('addVersionButton').addEventListener('click', async function() {
     const assetId = document.getElementById('assetId').value;
     const versionNumber = document.getElementById('versionNumber').value;
@@ -65,7 +69,7 @@ document.getElementById('addVersionButton').addEventListener('click', async func
     alert('Please choose a version file.');
     return;
 }
-
+// Prepare and upload the selected version file to the backend
 const formData = new FormData();
 formData.append('versionFile', versionFile);
 
@@ -82,7 +86,7 @@ if (!uploadResponse.ok) {
 }
 
 const filePath = uploadResult.filePath;
-
+// Save the new version details and uploaded file path in the database
     const response = await fetch(`/assets/${assetId}/versions`, {
         method: 'POST',
         headers: {
@@ -98,6 +102,7 @@ const filePath = uploadResult.filePath;
     const result = await response.json();
     alert(result.message);
 });
+// Load the version history for the asset selected by the user
 function viewSelectedVersions() {
     const assetId = document.getElementById('assetId').value;
 
@@ -108,9 +113,11 @@ function viewSelectedVersions() {
 
     loadVersions(assetId);
 }
+// Retrieve and display the stored version history for the selected asset
 async function loadVersions(assetId) {
     const response = await fetch(`/assets/${assetId}/versions`);
     const versions = await response.json();
+    // Automatically suggest the next version number based on the current highest version
     if (versions.length > 0) {
     const highestVersion = Math.max(
         ...versions.map(version => Number(version.Version_Number))
@@ -123,7 +130,7 @@ async function loadVersions(assetId) {
 
     const versionList = document.getElementById('versionList');
     versionList.innerHTML = '';
-
+// Display each version and determine the appropriate preview based on its file type
    versions.forEach((version, index) => {
     const filePath = version.File_Path || '';
     const isImage = /\.(png|jpg|jpeg|webp)$/i.test(filePath);
@@ -158,8 +165,10 @@ const isDocument = /\.(pdf|doc|docx|txt)$/i.test(filePath);
             </div>
 
             <div class="version-info">
+                <!-- Highlight the most recent asset version as the current version -->
                <h3>
     Version ${version.Version_Number}
+
     ${index === 0 ? '<span class="current-version-badge">CURRENT</span>' : ''}
 </h3>
                 <p><strong>File:</strong> ${version.File_Path}</p>

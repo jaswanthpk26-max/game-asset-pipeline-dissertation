@@ -1,8 +1,10 @@
+// Import required modules and load environment variables
 require('dotenv').config();
 const express = require('express');
 const mysql = require('mysql2');
 const multer = require('multer');
 const path = require('path');
+// Configure how uploaded files are stored and renamed
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, 'uploads/');
@@ -11,12 +13,15 @@ const storage = multer.diskStorage({
         cb(null, Date.now() + '-' + file.originalname);
     }
 });
-
+// Create Multer upload handler using the storage configuration
 const upload = multer({ storage: storage });
+// Create the Express application
 const app = express();
+// Configure middleware for JSON data, frontend files and uploaded files
 app.use(express.json());
 app.use(express.static('../frontend'));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Upload a file for a new asset version
 app.post('/upload-version-file', upload.single('versionFile'), (req, res) => {
     if (!req.file) {
         return res.status(400).json({
@@ -29,6 +34,7 @@ app.post('/upload-version-file', upload.single('versionFile'), (req, res) => {
         filePath: '/uploads/' + req.file.filename
     });
 });
+// Upload a preview image for an asset
 app.post('/upload-preview', upload.single('previewFile'), (req, res) => {
     if (!req.file) {
         return res.status(400).json({
@@ -41,13 +47,16 @@ app.post('/upload-preview', upload.single('previewFile'), (req, res) => {
         previewPath: '/uploads/' + req.file.filename
     });
 });
+// Define the port used by the backend server
 const PORT = 3000;
+// Create the MySQL database connection using environment variables
 const db = mysql.createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME
 });
+// Connect the application to the MySQL database
 db.connect((err) => {
     if (err) {
         console.log('Database connection failed!');
@@ -56,9 +65,11 @@ db.connect((err) => {
         console.log('Connected to MySQL Database!');
     }
 });
+// Provide a simple welcome response for the system
 app.get('/', (req, res) => {
     res.send('Welcome to the Game Asset Pipeline System!');
 });
+// Retrieve all registered users from the database
 app.get('/users', (req, res) => {
     const sql = 'SELECT * FROM Users';
 
@@ -71,6 +82,7 @@ app.get('/users', (req, res) => {
         }
     });
 });
+// Retrieve all projects from the database
 app.get('/projects', (req, res) => {
     const sql = 'SELECT * FROM Projects';
 
@@ -83,7 +95,7 @@ app.get('/projects', (req, res) => {
         }
     });
 });
-
+// Retrieve all assets for display in the asset library
 app.get('/assets', (req, res) => {
     const sql = 'SELECT * FROM Assets';
 
@@ -96,7 +108,7 @@ app.get('/assets', (req, res) => {
         }
     });
 });
-
+// Update an asset's workflow status and record the change
 app.put('/assets/:id/status', (req, res) => {
     const assetId = req.params.id;
     const { status } = req.body;
@@ -171,7 +183,7 @@ app.put('/assets/:id/status', (req, res) => {
         });
     });
 });
-
+// Add a new asset to the project and store its details in the database
 app.post('/assets', (req, res) => {
     const { assetName, assetType, filePath, previewPath, status } = req.body;
 
@@ -190,6 +202,7 @@ VALUES (?, ?, ?, ?, 1, 1, ?)
         }
     });
 });
+// Authenticate a user using their email and password
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
     const sql = 'SELECT * FROM Users WHERE Email = ? AND Password = ?';
@@ -205,7 +218,7 @@ if (err) {
 }
 });
 });
-
+// Create and store a new version of an existing asset
 app.post('/assets/:assetId/versions', (req, res) => {
     const assetId = req.params.assetId;
     const { versionNumber, filePath, notes } = req.body;
@@ -229,6 +242,7 @@ app.post('/assets/:assetId/versions', (req, res) => {
         });
     });
 });
+// Retrieve the version history of a selected asset
 app.get('/assets/:assetId/versions', (req, res) => {
     const assetId = req.params.assetId;
 
@@ -249,6 +263,7 @@ app.get('/assets/:assetId/versions', (req, res) => {
         res.json(results);
     });
 });
+// Create a new notification for a user
 app.post('/notifications', (req, res) => {
     const { userId, message } = req.body;
 
@@ -271,6 +286,7 @@ app.post('/notifications', (req, res) => {
         });
     });
 });
+// Retrieve notifications for a selected user
 app.get('/notifications/:userId', (req, res) => {
     const userId = req.params.userId;
 
@@ -291,7 +307,7 @@ app.get('/notifications/:userId', (req, res) => {
         res.json(results);
     });
 });
-
+// Mark a selected notification as read
 app.put('/notifications/:notificationId/read', (req, res) => {
     const notificationId = req.params.notificationId;
 
@@ -314,6 +330,7 @@ app.put('/notifications/:notificationId/read', (req, res) => {
         });
     });
 });
+// Retrieve the asset activity history for the audit trail
 app.get('/asset-activity', (req, res) => {
     const sql = `
         SELECT
@@ -343,6 +360,7 @@ app.get('/asset-activity', (req, res) => {
         res.json(results);
     });
 });
+// Permanently delete an asset and its related activity and version records
 app.delete('/assets/:assetId', (req, res) => {
     const assetId = req.params.assetId;
 
@@ -398,7 +416,7 @@ app.delete('/assets/:assetId', (req, res) => {
         }
     );
 });
-
+// Start the Express server and listen for incoming requests
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });

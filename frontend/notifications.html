@@ -6,10 +6,10 @@
 </head>
 
 <body>
-
+<!-- Display the notifications page and notification testing controls -->
     <h1>Notifications</h1>
     <h2>Create Test Notification</h2>
-
+<!-- Allow a test notification message to be created -->
 <input type="text" id="messageInput" placeholder="Enter notification message">
 
 <button id="createNotificationButton">
@@ -20,11 +20,13 @@
 
     <div id="notificationList"></div>
 <script>
+    // Check whether the user is logged in before allowing access to notifications
     const storedUserRole = localStorage.getItem('userRole');
 
 if (!storedUserRole) {
     window.location.href = '/login.html';
 }
+// Create a new test notification when the button is clicked
     document.getElementById('createNotificationButton').addEventListener('click', async function() {
     const message = document.getElementById('messageInput').value;
 
@@ -44,9 +46,11 @@ if (!storedUserRole) {
 
     location.reload();
 });
+// Retrieve the user's notifications from the backend for display
 fetch('/notifications/1')
     .then(response => response.json())
     .then(notifications => {
+        // Display each notification with its message, date and read status
        notifications.forEach(notification => {
     document.getElementById('notificationList').innerHTML += `
         <p>${notification.Message}</p>
@@ -61,6 +65,7 @@ fetch('/notifications/1')
     `;
 });
     });
+    // Mark the selected notification as read in the database
     async function markAsRead(notificationId) {
     const response = await fetch(`/notifications/${notificationId}/read`, {
         method: 'PUT'

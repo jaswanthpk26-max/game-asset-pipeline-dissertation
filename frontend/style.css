@@ -1,3 +1,6 @@
+/* ================================
+   GLOBAL PAGE AND FORM STYLING
+================================ */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -47,7 +50,9 @@ form {
     min-width: 130px;
 }
 
-
+/* ================================
+   DARK GAME PRODUCTION THEME
+================================ */
 body {
     background:
         radial-gradient(circle at top left, rgba(0, 217, 255, 0.12), transparent 35%),
@@ -98,7 +103,9 @@ select:focus {
     color: white;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
 }
-
+/* ================================
+   ASSET LIBRARY AND ASSET CARDS
+================================ */
 #assetList > div,
 .asset-card {
     background: linear-gradient(145deg, #171a23, #202431);
@@ -210,6 +217,9 @@ select:focus {
 .asset-meta strong {
     color: #ffffff;
 }
+/* ================================
+   DASHBOARD PIPELINE VISUALISATION
+================================ */
 .pipeline-flow {
     display: flex;
     align-items: center;
@@ -244,6 +254,9 @@ select:focus {
     font-size: 30px;
     color: #7ee8ff;
 }
+/* ================================
+   DASHBOARD ANALYTICS AND INSIGHTS
+================================ */
 .analytics-section {
     margin-top: 30px;
 }
@@ -307,6 +320,9 @@ select:focus {
     font-size: 28px;
     color: #7ee8ff;
 }
+/* ================================
+   VISUAL WORKFLOW BOARD
+================================ */
 .workflow-board {
     display: grid;
     grid-template-columns: repeat(4, minmax(260px, 1fr));
@@ -534,6 +550,9 @@ select:focus {
 .activity-user strong {
     color: white;
 }
+/* ================================
+   ASSET VERSION HISTORY
+================================ */
 .version-card {
     display: grid;
     grid-template-columns: 220px 1fr;
@@ -677,6 +696,9 @@ select:focus {
     color: #fbbf24;
     text-shadow: 0 0 14px rgba(251, 191, 36, 0.4);
 }
+/* ================================
+   ASSET PREVIEW AND PREVIEW MODAL
+================================ */
 .asset-preview {
     height: 150px;
     margin: 16px 0;
@@ -759,6 +781,9 @@ select:focus {
 .preview-close:hover {
     background: #3a4356;
 }
+/* ================================
+   WORKFLOW ASSET PREVIEWS
+================================ */
 .workflow-preview {
     width: 100%;
     height: 150px;
@@ -785,6 +810,9 @@ select:focus {
     color: #9be7ff;
     text-align: center;
 }
+/* ================================
+   DASHBOARD RECENT ACTIVITY
+================================ */
 .dashboard-activity-section {
     margin-top: 28px;
 }
@@ -859,6 +887,9 @@ select:focus {
     color: #929bad;
     font-size: 14px;
 }
+/* ================================
+   DASHBOARD HEADER AND USER ROLE
+================================ */
 .dashboard-header {
     display: flex;
     justify-content: space-between;
@@ -927,6 +958,9 @@ select:focus {
     margin: 0 0 18px;
     font-size: 22px;
 }
+/* ================================
+   DASHBOARD SUMMARY CARDS
+================================ */
 .summary-card {
     position: relative;
     overflow: hidden;
@@ -1040,6 +1074,9 @@ select:focus {
 .logout-action:hover {
     border-color: #ff8585;
 }
+/* ================================
+   LOGIN PAGE
+================================ */
 .login-page {
     min-height: 100vh;
     display: flex;
@@ -1087,6 +1124,9 @@ select:focus {
     width: 100%;
     margin-top: 5px;
 }
+/* ================================
+   PROJECTS PAGE AND PROJECT CARDS
+================================ */
 #projectList {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));

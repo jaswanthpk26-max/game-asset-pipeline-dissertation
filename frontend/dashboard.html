@@ -7,7 +7,7 @@
 </head>
 
 <body>
-
+<!-- Display the dashboard title and the currently logged-in user role -->
     <div class="dashboard-header">
 
     <div>
@@ -24,7 +24,7 @@
     </div>
 
 </div>
-
+<!-- Display summary statistics for assets at each production stage -->
 <h2 class="dashboard-section-title">Production Overview</h2>
 
 <div class="dashboard-summary">
@@ -66,7 +66,7 @@
 </div>
 
 </div>
-   
+   <!-- Provide quick navigation to the main production system features -->
 <section class="quick-actions-section">
 
     <div class="quick-actions-header">
@@ -115,6 +115,7 @@
     </div>
 
 </section>
+<!-- Visualise the number of assets moving through each workflow stage -->
 <h3>Production Pipeline</h3>
 
 <div class="pipeline-flow">
@@ -144,6 +145,7 @@
         <strong id="pipelineFinal">0</strong>
     </div>
 </div>
+<!-- Display production analytics, asset distribution and pipeline insights -->
 <div class="analytics-section">
 
     <div class="chart-panel">
@@ -185,6 +187,7 @@
     </div>
 </div>
 </div>
+<!-- Display the latest asset workflow changes from the audit trail -->
 <section class="dashboard-activity-section">
 
     <div class="dashboard-panel">
@@ -206,6 +209,7 @@
 
 </section>
 <script>
+    // Retrieve asset data from the backend to calculate dashboard statistics
 fetch('/assets')
     .then(response => response.json())
     .then(assets => {
@@ -232,6 +236,7 @@ document.getElementById('pipelineReview').textContent =
 
 document.getElementById('pipelineFinal').textContent =
     assets.filter(asset => asset.Status === 'Final').length;
+    // Calculate asset counts and percentages used in the Production Insights panel
     const draftCount = assets.filter(asset => asset.Status === 'Draft').length;
 const progressCount = assets.filter(asset => asset.Status === 'In Progress').length;
 const reviewCount = assets.filter(asset => asset.Status === 'Review').length;
@@ -252,7 +257,7 @@ document.getElementById('insightTotal').textContent = totalAssets;
 document.getElementById('insightReview').textContent = reviewPercentage + '%';
 document.getElementById('insightCompleted').textContent = completedPercentage + '%';
 document.getElementById('insightActive').textContent = activeAssets;
-
+// Create a doughnut chart to visualise the distribution of asset workflow statuses
 const ctx = document.getElementById('statusChart');
 
 new Chart(ctx, {
@@ -288,6 +293,7 @@ new Chart(ctx, {
     }
 });
     });
+    // Retrieve notifications and calculate the number of unread updates
     fetch('/notifications/1')
     .then(response => response.json())
     .then(notifications => {
@@ -298,6 +304,7 @@ new Chart(ctx, {
         document.getElementById('unreadCount').textContent =
             unreadNotifications.length;
     });
+    // Clear the stored user session details and return to the login page
     function logout() {
     localStorage.removeItem('userRole');
     localStorage.removeItem('userId');
@@ -306,20 +313,23 @@ new Chart(ctx, {
 }
 </script>
 <script>
+    // Check whether the user is logged in before allowing access to the dashboard
     const storedUserRole = localStorage.getItem('userRole');
 
 if (!storedUserRole) {
     window.location.href = '/login.html';
 }
+// Display the currently logged-in user's role on the dashboard
     const userRole = localStorage.getItem('userRole');
     document.getElementById('roleDisplay').textContent = 'Logged in as: ' + userRole;
+    // Retrieve the latest asset workflow changes for the Recent Activity panel
 fetch('/asset-activity')
     .then(response => response.json())
     .then(activities => {
         const activityList = document.getElementById('dashboardActivityList');
 
         activityList.innerHTML = '';
-
+// Limit the dashboard display to the five most recent activity records
         const recentActivities = activities.slice(0, 5);
 
         recentActivities.forEach(activity => {

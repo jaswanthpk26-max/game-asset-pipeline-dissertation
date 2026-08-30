@@ -6,12 +6,12 @@
 </head>
 
 <body>
-
+<!-- Display the Asset Library page title and description -->
     <div class="page-header">
     <h1>Asset Library</h1>
     <p>Manage production assets, versions and workflow stages.</p>
 </div>
-
+<!-- Form for adding a new production asset to the system -->
 <div class="asset-panel">
     <h2>Add New Asset</h2>
 <form id="assetForm">
@@ -48,6 +48,7 @@
 
 </form>
 </div>
+<!-- Search and filter controls used to find assets in the library -->
 <div class="asset-panel">
     <h2>Search and Filter</h2>
 <label>Search Assets:</label>
@@ -65,11 +66,13 @@
 </div>
     <div id="assetList"></div>
 <script>
+    // Check whether the user is logged in before allowing access to the Asset Library
     const storedUserRole = localStorage.getItem('userRole');
 
     if (!storedUserRole) {
         window.location.href = '/login.html';
     }
+    // Handle the Add Asset form submission and collect the entered asset details
     document.getElementById('assetForm').addEventListener('submit', async function(event) {
     event.preventDefault();
 
@@ -79,7 +82,7 @@
     const status = document.getElementById('assetStatus').value;
     const previewFile = document.getElementById('previewFile').files[0];
     let previewPath = null;
-
+// Upload the selected preview image before saving the new asset
 if (previewFile) {
     const previewFormData = new FormData();
     previewFormData.append('previewFile', previewFile);
@@ -92,6 +95,7 @@ if (previewFile) {
     const previewUploadResult = await previewUploadResponse.json();
     previewPath = previewUploadResult.previewPath;
 }
+// Send the new asset details to the backend for database storage
     const response = await fetch('/assets', {
     method: 'POST',
     headers: {
@@ -109,12 +113,13 @@ const result = await response.json();
 alert(result.message);
 location.reload();
 });
+// Retrieve the existing assets from the backend for display in the Asset Library
 fetch('/assets')
     .then(response => response.json())
     .then(assets => {
         const searchInput = document.getElementById('searchInput');
         const typeFilter = document.getElementById('typeFilter');
-
+// Filter the asset list using the entered name and selected asset type
 function applyFilters() {
     const searchText = searchInput.value.toLowerCase();
     const selectedType = typeFilter.value;
@@ -135,6 +140,7 @@ function applyFilters() {
 
 searchInput.addEventListener('input', applyFilters);
 typeFilter.addEventListener('change', applyFilters);
+// Display the filtered assets as individual cards in the Asset Library
    function displayAssets(assetArray) {
     document.getElementById('assetList').innerHTML = '';
 
@@ -167,6 +173,7 @@ typeFilter.addEventListener('change', applyFilters);
         <p><strong>File</strong><br>${asset.File_Path}</p>
         <p><strong>Last Updated</strong><br>${new Date(asset.Last_Updated).toLocaleString()}</p>
     </div>
+    <!-- Delete control is displayed only for the Administrator role -->
     ${storedUserRole === 'Administrator' ? `
     <div class="asset-actions">
         <button
@@ -183,15 +190,17 @@ typeFilter.addEventListener('change', applyFilters);
 
 displayAssets(assets);
     });
+    // Open the selected asset preview image in a larger modal window
     function openPreview(imagePath, assetName) {
     document.getElementById('previewLargeImage').src = imagePath;
     document.getElementById('previewTitle').textContent = assetName;
     document.getElementById('previewModal').style.display = 'flex';
 }
-
+// Close the large asset preview modal
 function closePreview() {
     document.getElementById('previewModal').style.display = 'none';
 }
+// Permanently delete a selected asset after receiving user confirmation
 async function deleteAsset(assetId) {
     const confirmed = confirm(
         'Are you sure you want to permanently delete this asset? Its versions and activity history will also be removed.'
@@ -220,6 +229,7 @@ async function deleteAsset(assetId) {
     }
 }
 </script>
+<!-- Modal used to display a larger preview of the selected asset image -->
 <div id="previewModal" class="preview-modal" onclick="closePreview()">
 
     <div class="preview-modal-content" onclick="event.stopPropagation()">

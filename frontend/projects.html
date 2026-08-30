@@ -6,19 +6,22 @@
 </head>
 
 <body>
-
+<!-- Display the available game production projects -->
     <h1>Projects</h1>
 
     <div id="projectList"></div>
 <script>
+    // Check whether the user is logged in before allowing access to the Projects page
     const storedUserRole = localStorage.getItem('userRole');
 
 if (!storedUserRole) {
     window.location.href = '/login.html';
 }
+// Retrieve the available projects from the backend
 fetch('/projects')
     .then(response => response.json())
     .then(projects => {
+        // Display each project and its production information as a project card
         projects.forEach(project => {
     document.getElementById('projectList').innerHTML += `
     <div class="project-card">

@@ -6,12 +6,12 @@
 </head>
 
 <body>
-
+<!-- Display the page title and purpose of the audit trail -->
     <div class="page-header">
         <h1>Asset Activity & Audit Trail</h1>
         <p>Track status changes, responsible users and production timestamps.</p>
     </div>
-
+<!-- Container used to display the asset production history -->
     <div class="activity-panel">
         <div class="activity-panel-header">
             <h2>Production History</h2>
@@ -22,11 +22,13 @@
     </div>
 
     <script>
+        // Check whether the user is logged in before allowing access to this page
         const storedUserRole = localStorage.getItem('userRole');
 
         if (!storedUserRole) {
             window.location.href = '/login.html';
         }
+        // Fetch the asset activity records from the backend
         fetch('/asset-activity')
     .then(response => response.json())
     .then(activities => {
@@ -65,9 +67,9 @@
     </div>
 `;
         }
-
+// Display each status change as an item in the activity timeline
         activities.forEach(activity => {
-
+// Convert the stored activity timestamp into a readable UK date and time
             const changedDate = new Date(activity.Changed_At);
 
             const formattedDate = changedDate.toLocaleString('en-GB', {
@@ -109,6 +111,7 @@
             `;
         });
     })
+    // Handle errors if the activity data cannot be loaded
     .catch(error => {
         console.error('Failed to load activity:', error);
     });

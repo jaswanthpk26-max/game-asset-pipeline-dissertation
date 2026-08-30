@@ -6,11 +6,13 @@
 </head>
 
 <body>
+    <!-- Display the login interface for accessing the Game Asset Pipeline System -->
     <div class="login-page">
     <div class="login-card">
 
     <h1>Game Asset Pipeline System</h1>
     <h2>Login</h2>
+    <!-- Collect the user's email and password for authentication -->
 <form id="loginForm">
     <label>Email:</label>
     <input type="email" name="email" id="email">
@@ -28,10 +30,12 @@
     </div>
 </div>
 <script>
+    // Handle the login form submission and collect the user's credentials
 document.getElementById('loginForm').addEventListener('submit', async function(event) {
     event.preventDefault();
     const email = document.getElementById('email').value;
 const password = document.getElementById('password').value;
+// Send the entered login credentials to the backend for authentication
 const response = await fetch('/login', {
     method: 'POST',
     headers: {
@@ -39,8 +43,10 @@ const response = await fetch('/login', {
     },
     body: JSON.stringify({ email, password })
 });
+
 const data = await response.json();
 document.getElementById('message').textContent = data.message;
+// Store the authenticated user's role and ID for use across protected pages
 if (response.ok) {
     localStorage.setItem('userRole', data.user.Role);
 localStorage.setItem('userId', data.user.User_ID);
